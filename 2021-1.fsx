@@ -1,23 +1,18 @@
-let (|IsIncrease|_|) (x, y) =
-    if y > x then Some () else None
+// https://adventofcode.com/2021/day/1
 
-let countNumberOfIncreases: seq<int * int> -> int =
-    Seq.sumBy (function | IsIncrease -> 1 | _otherwise -> 0)
+// given a list of depth measurements,
+// count the number of times a depth measurement increases.
+let part1: int seq -> int =                 // [6; 7; 6; 7]
+    Seq.pairwise                            // [(6,7); (7, 6); (6, 7)]
+    >> Seq.filter (fun (x, y) -> y > x)     // [(6, 7); (6, 7)]
+    >> Seq.length                           // 2
 
-let part1: int seq -> int =
-    Seq.pairwise >> countNumberOfIncreases
-
-let part2: int seq -> int =
-    // Credits to @mafinar for clever tripplewise implementation
-    let tripplewise =                       // [a; b; c; d]
-        Seq.pairwise                        // [(a, b); (b, c); (c, d)]
-        >> Seq.pairwise                     // [((a, b), (b, c))); ((b, c), (c, d))]
-        >> Seq.map (function
-            | (x, y), (_, z) -> x, y, z)    // [(a, b, c), (b, c, d)]
-
-                                            // [1; 2; 3; 4; 5]
-    tripplewise                             // [(1, 2, 3); (2, 3, 4); (3, 4, 5)]
-    >> Seq.map (fun (x, y, z) -> x + y + z) // [6; 8; 12]
+// given a list of depth measurements,
+// create sums of three-measurement sliding window,
+// and count the number of times the sum measurement in this sliding window increases.
+let part2: int seq -> int =                 // [1; 2; 3; 2; 1; 4]
+    Seq.windowed 3                          // [(1,2,3); (2,3,2); (3,2,1); (2,1,4)]
+    >> Seq.map Array.sum                    // [6; 7; 6; 7]
     >> part1                                // 2
 
 let run =
