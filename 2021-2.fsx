@@ -40,24 +40,18 @@ let solve (applyCommand: State -> Command -> State): Command seq -> int =
     Seq.fold applyCommand initialState >> (fun state -> state.HorizontalPosition * state.Depth)
 
 module Parser =
-    let (|StartsWith|_|) (needle: string) (haystack: string) =
-        if needle.Length > haystack.Length then
-            None
-        elif haystack.Substring(0, needle.Length) = needle then
-            Some (haystack.Substring(needle.Length))
-        else
-            None
-
     let (|Int|_|) (str: string) =
         match System.Int32.TryParse (str.Trim()) with
         | true, i -> Some i
         | _ -> None
 
-    let parseLine (index: int) = function
-        | StartsWith "forward" (Int x) -> Forward x
-        | StartsWith "down" (Int x) -> Down x
-        | StartsWith "up" (Int x) -> Up x
-        | unknownCommand -> failwith $"Failed parsing unknown command {unknownCommand} at Line {index}."
+    let parseLine (index: int) (str: string) =
+        str.Split ' '
+        |> function
+            | [| "forward"; (Int x) |] -> Forward x
+            | [| "down"   ; (Int x) |] -> Down x
+            | [| "up"     ; (Int x) |] -> Up x
+            | _ -> failwith $"Failed parsing unknown command {str} at Line {index}."
 
 let run =
     System.IO.File.ReadLines
