@@ -15,24 +15,34 @@ let initialState =
       Depth = 0
       Aim = 0 }
 
-// forward X increases the horizontal position by X units.
-// down X increases the depth by X units.
-// up X decreases the depth by X units.
-let ``apply command without taking aim into account`` (state: State) = function
-    | Forward i -> { state with HorizontalPosition = state.HorizontalPosition + i }
-    | Down i -> { state with Depth = state.Depth + i }
-    | Up i -> { state with Depth = state.Depth - i }
+let ``increase horizontal position by`` (x: int) (state: State) =
+    { state with HorizontalPosition = state.HorizontalPosition + x }
 
-// down X increases your aim by X units.
-// up X decreases your aim by X units.
-// forward X does two things:
-// - It increases your horizontal position by X units.
-// - It increases your depth by your aim multiplied by X.
+let ``increase depth by`` (x: int) (state: State) =
+    { state with Depth = state.Depth + x }
+
+let ``decrease depth by`` (x: int) (state: State) =
+    { state with Depth = state.Depth - x }
+
+let ``apply command without taking aim into account`` (state: State) = function
+    | Forward x -> state |> ``increase horizontal position by`` x
+    | Down x    -> state |> ``increase depth by`` x
+    | Up x      -> state |> ``decrease depth by`` x
+
+let ``increase depth by aim multiplied by`` (x: int) (state: State) =
+    { state with Depth = state.Depth + state.Aim * x }
+
+let ``increase aim by`` (x: int) (state: State) =
+    { state with Aim = state.Aim + x }
+
+let ``decrease aim by`` (x: int) (state: State) =
+    { state with Aim = state.Aim - x }
+
 let ``apply command and take aim into account`` (state: State) = function
-    | Forward i -> { state with HorizontalPosition = state.HorizontalPosition + i
-                                Depth = state.Depth + state.Aim * i }
-    | Down i -> { state with Aim = state.Aim + i }
-    | Up i -> { state with Aim = state.Aim - i }
+    | Forward x -> state |> ``increase horizontal position by`` x
+                         |> ``increase depth by aim multiplied by`` x
+    | Down x    -> state |> ``increase aim by`` x
+    | Up x      -> state |> ``decrease aim by`` x
 
 // Calculate the horizontal position and depth after following the planned course (represented as a sequence of commands)
 // What do you get if you multiply your final horizontal position by your final depth?
